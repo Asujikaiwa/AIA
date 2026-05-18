@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --aia-red: #d31145;
+  --aia-red-dark: #a8072f;
+  --aia-slate: #2c3e50;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: #ffffff;
+  color: var(--aia-slate);
+}
+
+@layer components {
+  .section-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-aia-red px-6 py-3 text-base font-semibold text-white shadow-soft transition-all duration-300 hover:bg-aia-redDark hover:shadow-lg hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-aia-red focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border-2 border-aia-red bg-white px-6 py-3 text-base font-semibold text-aia-red transition-all duration-300 hover:bg-aia-red hover:text-white focus:outline-none focus:ring-2 focus:ring-aia-red focus:ring-offset-2;
+  }
+
+  .section-title {
+    @apply text-3xl sm:text-4xl font-bold text-aia-slate tracking-tight;
+  }
+
+  .section-eyebrow {
+    @apply inline-block text-sm font-semibold uppercase tracking-widest text-aia-red mb-3;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #d31145;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a8072f;
+}

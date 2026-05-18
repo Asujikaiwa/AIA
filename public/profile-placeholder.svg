@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#D31145"/>
+      <stop offset="100%" stop-color="#A8072F"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="800" fill="url(#bg)"/>
+  <circle cx="300" cy="300" r="120" fill="#ffffff" opacity="0.15"/>
+  <circle cx="300" cy="280" r="80" fill="#ffffff" opacity="0.4"/>
+  <path d="M180 600 Q300 480 420 600 L420 800 L180 800 Z" fill="#ffffff" opacity="0.4"/>
+  <text x="300" y="740" text-anchor="middle" fill="#ffffff" font-family="sans-serif" font-size="24" font-weight="600">
+    วางรูปโปรไฟล์ของคุณที่ /public/profile.jpg
+  </text>
+</svg>
