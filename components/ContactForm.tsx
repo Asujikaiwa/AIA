@@ -185,7 +185,7 @@ export default function ContactForm() {
           >
             <div className="bg-aia-red rounded-3xl p-7 text-white">
               <MessageCircle size={32} className="mb-4" />
-              <h3 className="text-xl font-bold mb-2">ทักไลน์ OA</h3>
+              <h3 className="text-xl font-bold mb-2">ทักไลน์ </h3>
               <p className="text-sm text-white/90 mb-5">
                 สะดวกที่สุด ตอบกลับภายในไม่กี่นาที
                 สแกน QR หรือกดปุ่มด้านล่าง
@@ -209,14 +209,14 @@ export default function ContactForm() {
             <ContactChannel
               icon={Phone}
               title="โทรหาผมโดยตรง"
-              value="08X-XXX-XXXX"
-              href="tel:+66800000000"
+              value="096-249-2611"
+              href="tel:+66962492611"
             />
             <ContactChannel
               icon={Mail}
               title="อีเมล"
-              value="phaiboonjaae@gmail.com"
-              href="mailto:phaiboonjaae@gmail.com"
+              value="phaiboonaia@gmail.com"
+              href="mailto:phaiboonaia@gmail.com"
             />
           </motion.div>
         </div>

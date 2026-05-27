@@ -43,7 +43,7 @@ export default function Testimonials() {
             ลูกค้าจริง รีวิวจริง
           </h2>
           <p className="mt-5 text-lg text-aia-gray">
-            ความไว้ใจจากลูกค้ากว่า 500 ครอบครัว
+            ความไว้ใจจากลูกค้า
             คือเครื่องยืนยันคุณภาพการบริการของผม
           </p>
         </motion.div>

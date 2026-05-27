@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 
 const navLinks = [
-  { href: "#about", label: "เกี่ยวกับฉัน" },
-  { href: "#products", label: "ผลิตภัณฑ์" },
-  { href: "#why-me", label: "ทำไมต้องเลือกฉัน" },
-  { href: "#testimonials", label: "รีวิวลูกค้า" },
-  { href: "#contact", label: "ติดต่อ" }
+  { href: "/#about", label: "เกี่ยวกับฉัน" },
+  { href: "/#products", label: "ผลิตภัณฑ์" },
+  { href: "/brochures", label: "โบรชัวร์" },
+  { href: "/#why-me", label: "ทำไมต้องเลือกฉัน" },
+  { href: "/#testimonials", label: "รีวิวลูกค้า" },
+  { href: "/#contact", label: "ติดต่อ" }
 ];
 
 export default function Navbar() {
@@ -31,7 +32,7 @@ export default function Navbar() {
       }`}
     >
       <nav className="section-container flex items-center justify-between h-16 sm:h-20">
-        <a href="#hero" className="flex items-center gap-2">
+        <a href="/#hero" className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-lg bg-aia-red text-white flex items-center justify-center font-bold text-lg">
             AIA
           </div>
@@ -59,7 +60,7 @@ export default function Navbar() {
         </ul>
 
         <a
-          href="#contact"
+          href="/#contact"
           className="hidden lg:inline-flex btn-primary !py-2 !px-5 !text-sm"
         >
           ปรึกษาฟรี
@@ -90,7 +91,7 @@ export default function Navbar() {
             ))}
             <li>
               <a
-                href="#contact"
+                href="/#contact"
                 onClick={() => setOpen(false)}
                 className="btn-primary w-full"
               >

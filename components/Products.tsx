@@ -5,8 +5,11 @@ import {
   HeartPulse,
   Users,
   ShieldAlert,
-  PiggyBank
+  PiggyBank,
+  FileText,
+  ArrowRight
 } from "lucide-react";
+import Link from "next/link";
 import ProductCard from "./ProductCard";
 
 const products = [
@@ -90,6 +93,26 @@ export default function Products() {
             <ProductCard key={p.title} {...p} index={i} />
           ))}
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5 }}
+          className="mt-12 text-center"
+        >
+          <p className="text-aia-gray mb-4">
+            ดูแบบประกันทั้งหมดพร้อมโบรชัวร์รายละเอียดได้ที่นี่
+          </p>
+          <Link
+            href="/brochures"
+            className="inline-flex items-center gap-2 rounded-full border-2 border-aia-red bg-white px-7 py-3 text-base font-semibold text-aia-red transition-all duration-300 hover:bg-aia-red hover:text-white"
+          >
+            <FileText size={18} />
+            ดูโบรชัวร์ทั้งหมด
+            <ArrowRight size={18} />
+          </Link>
+        </motion.div>
       </div>
     </section>
   );
