@@ -1,6 +1,15 @@
 import type { Metadata } from "next";
 import { Prompt } from "next/font/google";
 import "./globals.css";
+import StickyContact from "@/components/StickyContact";
+import CookieConsent from "@/components/CookieConsent";
+import JsonLd from "@/components/JsonLd";
+import Analytics from "@/components/Analytics";
+import {
+  personSchema,
+  financialServiceSchema,
+  websiteSchema
+} from "@/lib/seo";
 
 const prompt = Prompt({
   subsets: ["latin", "thai"],
@@ -79,8 +88,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="th" className={prompt.variable}>
+      <head>
+        <JsonLd data={personSchema()} />
+        <JsonLd data={financialServiceSchema()} />
+        <JsonLd data={websiteSchema()} />
+      </head>
       <body className="font-sans antialiased bg-white text-aia-slate">
         {children}
+        <StickyContact />
+        <CookieConsent />
+        <Analytics />
       </body>
     </html>
   );

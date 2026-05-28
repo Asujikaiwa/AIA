@@ -59,35 +59,38 @@ export default function Footer() {
             <h4 className="font-semibold text-white mb-4">เมนู</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <a
-                  href="#about"
-                  className="hover:text-aia-red transition-colors"
-                >
+                <a href="/#about" className="hover:text-aia-red transition-colors">
                   เกี่ยวกับฉัน
                 </a>
               </li>
               <li>
-                <a
-                  href="#products"
-                  className="hover:text-aia-red transition-colors"
-                >
+                <a href="/#products" className="hover:text-aia-red transition-colors">
                   ผลิตภัณฑ์ประกัน
                 </a>
               </li>
               <li>
-                <a
-                  href="#why-me"
-                  className="hover:text-aia-red transition-colors"
-                >
-                  ทำไมต้องเลือกฉัน
+                <a href="/brochures" className="hover:text-aia-red transition-colors">
+                  โบรชัวร์
                 </a>
               </li>
               <li>
-                <a
-                  href="#contact"
-                  className="hover:text-aia-red transition-colors"
-                >
+                <a href="/recommend" className="hover:text-aia-red transition-colors">
+                  เลือกแบบให้ฉัน
+                </a>
+              </li>
+              <li>
+                <a href="/#faq" className="hover:text-aia-red transition-colors">
+                  คำถามที่พบบ่อย
+                </a>
+              </li>
+              <li>
+                <a href="/#contact" className="hover:text-aia-red transition-colors">
                   ติดต่อปรึกษา
+                </a>
+              </li>
+              <li>
+                <a href="/privacy" className="hover:text-aia-red transition-colors">
+                  นโยบายความเป็นส่วนตัว
                 </a>
               </li>
             </ul>
@@ -100,19 +103,27 @@ export default function Footer() {
               <li>
                 ใบอนุญาตตัวแทน คปภ.
                 <br />
-                <span className="text-gray-400">เลขที่ XXXXXXXXX</span>
+                <span className="text-gray-400">เลขที่ 6901006784</span>
               </li>
               <li>
-                รหัสตัวแทน AIA
+                สังกัด
                 <br />
-                <span className="text-gray-400">XXXXXX</span>
+                <span className="text-gray-400">บริษัท เอไอเอ จำกัด</span>
               </li>
               <li className="pt-2">
                 <a
-                  href="mailto:phaiboonjaae@gmail.com"
+                  href="mailto:phaiboonaia@gmail.com"
                   className="hover:text-aia-red transition-colors"
                 >
-                  phaiboonjaae@gmail.com
+                  phaiboonaia@gmail.com
+                </a>
+              </li>
+              <li>
+                <a
+                  href="tel:+66962492611"
+                  className="hover:text-aia-red transition-colors"
+                >
+                  096-249-2611
                 </a>
               </li>
             </ul>

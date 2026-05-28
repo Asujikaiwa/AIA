@@ -8,7 +8,8 @@ import {
   Phone,
   Mail,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  type LucideIcon
 } from "lucide-react";
 
 type FormStatus = "idle" | "sending" | "success" | "error";
@@ -264,7 +265,7 @@ function ContactChannel({
   value,
   href
 }: {
-  icon: React.ComponentType<{ size?: number }>;
+  icon: LucideIcon;
   title: string;
   value: string;
   href: string;

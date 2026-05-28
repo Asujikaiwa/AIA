@@ -61,11 +61,11 @@ export default function Hero() {
             </a>
           </div>
 
-          {/* Trust badges */}
+          {/* Trust badges — แทนที่ตัวเลขด้วยจุดขายที่ตรวจสอบได้ */}
           <div className="mt-10 grid grid-cols-3 gap-4 max-w-md">
-            <Stat number="500+" label="ลูกค้าที่ดูแล" />
-            <Stat number="5+" label="ปีประสบการณ์" />
-            <Stat number="98%" label="ความพึงพอใจ" />
+            <Stat number="คปภ." label="ใบอนุญาตจริง" />
+            <Stat number="60+" label="แบบประกัน AIA" />
+            <Stat number="ฟรี" label="ปรึกษาไม่ผูกมัด" />
           </div>
         </motion.div>
 

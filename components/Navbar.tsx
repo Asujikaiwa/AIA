@@ -7,8 +7,8 @@ const navLinks = [
   { href: "/#about", label: "เกี่ยวกับฉัน" },
   { href: "/#products", label: "ผลิตภัณฑ์" },
   { href: "/brochures", label: "โบรชัวร์" },
-  { href: "/#why-me", label: "ทำไมต้องเลือกฉัน" },
-  { href: "/#testimonials", label: "รีวิวลูกค้า" },
+  { href: "/recommend", label: "เลือกแบบให้ฉัน" },
+  { href: "/#faq", label: "คำถามที่พบบ่อย" },
   { href: "/#contact", label: "ติดต่อ" }
 ];
 

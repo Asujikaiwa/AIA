@@ -4,6 +4,8 @@ import { ArrowLeft, MessageCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BrochureBrowser from "@/components/BrochureBrowser";
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbSchema } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "โบรชัวร์และแบบประกัน",
@@ -15,6 +17,12 @@ export const metadata: Metadata = {
 export default function BrochuresPage() {
   return (
     <main className="min-h-screen bg-white">
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "หน้าหลัก", url: "/" },
+          { name: "โบรชัวร์", url: "/brochures" }
+        ])}
+      />
       <Navbar />
 
       {/* Header */}
