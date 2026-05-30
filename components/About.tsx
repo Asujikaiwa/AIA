@@ -56,7 +56,7 @@ export default function About() {
             className="group relative block w-full sm:w-64 aspect-[16/9] rounded-xl overflow-hidden border-2 border-aia-red/20 hover:border-aia-red shadow-soft transition-all"
           >
             <Image
-              src="/license-kpb2.jpg"
+              src="/license-kpb2.JPG"
               alt={t("about.license.title")}
               fill
               sizes="(max-width: 640px) 100vw, 256px"
@@ -156,7 +156,7 @@ export default function About() {
               className="relative w-full max-w-3xl aspect-[16/9] rounded-2xl overflow-hidden shadow-2xl cursor-default"
             >
               <Image
-                src="/license-kpb2.jpg"
+                src="/license-kpb2.JPG"
                 alt="ใบอนุญาตเป็นตัวแทนประกันชีวิต - คปภ."
                 fill
                 sizes="(max-width: 768px) 100vw, 768px"
