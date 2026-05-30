@@ -1,17 +1,5 @@
 import { NextResponse } from "next/server";
 
-/**
- * Lead submission endpoint.
- *
- * By default this just validates and logs the payload — replace the
- * `forwardLead` body with your preferred destination:
- *   - Webhook (Zapier, Make, n8n, Discord, Slack)
- *   - Email API (Resend, SendGrid, Mailgun)
- *   - Database (Supabase, Firestore, Notion)
- *
- * Set LEAD_WEBHOOK_URL in your .env.local to enable webhook forwarding.
- */
-
 type LeadPayload = {
   name?: string;
   phone?: string;
@@ -21,22 +9,35 @@ type LeadPayload = {
 };
 
 async function forwardLead(payload: LeadPayload) {
-  const url = process.env.LEAD_WEBHOOK_URL;
-  if (!url) {
-    // Local/dev: just log so you can verify wiring.
-    console.log("[lead] (no webhook configured) ", payload);
-    return;
-  }
+  // นำรหัสของคุณมาใส่ในเครื่องหมายคำพูดด้านล่างนี้
+  // (สำหรับการใช้งานจริงบน Production แนะนำให้ย้าย 2 ตัวแปรนี้ไปเก็บไว้ในไฟล์ .env.local นะครับ)
+  const LINE_ACCESS_TOKEN = "6ad+hE+rLr4M87MdXG/GYhPYW8J5YcADcnfQJ+E8ch5WqnpORtczVpxhyhmzdxwhur5B74JK3vSGFEVg+VVN8nse/ZWqKLnLpaDqzKxpnjFFQYMSEUrTcYNhOd7N73aFQq3+om+oLLSQ00PHwXaaOAdB04t89/1O/w1cDnyilFU=";
+  const YOUR_USER_ID = "U2f698231a14d6ebf30ad38d847233d05"; // ใส่ User ID ที่ต้องการให้ส่งข้อความเข้าไป
 
-  await fetch(url, {
+  // จัดรูปแบบข้อความที่จะส่งเข้า LINE
+  const textMessage = `🚨 มีลูกค้าสนใจประกันติดต่อมาใหม่!\n\nชื่อ: ${payload.name}\nเบอร์โทร: ${payload.phone}\nอีเมล: ${payload.email || "-"}\nสนใจ: ${payload.interest || "-"}\nข้อความ: ${payload.message || "-"}`;
+
+  // ยิง API ไปที่ LINE Messaging API
+  const response = await fetch("https://api.line.me/v2/bot/message/push", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${LINE_ACCESS_TOKEN}`,
+    },
     body: JSON.stringify({
-      ...payload,
-      submittedAt: new Date().toISOString(),
-      source: "phaiboon-aia-landing"
-    })
+      to: YOUR_USER_ID,
+      messages: [{ type: "text", text: textMessage }],
+    }),
   });
+
+  // เช็คว่าส่งสำเร็จหรือไม่ ถ้าไม่สำเร็จให้ log error ออกมา
+  if (!response.ok) {
+    const errorDetail = await response.text();
+    console.error("[LINE API Error]:", errorDetail);
+    throw new Error("Failed to send LINE message");
+  }
+  
+  console.log("[lead] ส่งแจ้งเตือนเข้า LINE สำเร็จ");
 }
 
 export async function POST(req: Request) {
@@ -58,6 +59,7 @@ export async function POST(req: Request) {
       );
     }
 
+    // เรียกใช้ฟังก์ชันส่ง LINE
     await forwardLead(data);
 
     return NextResponse.json({ ok: true });

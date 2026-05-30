@@ -101,23 +101,79 @@ git push -u origin main
 
 ## เรื่องขนาด PDF (160 MB)
 
-โบรชัวร์ 65 ไฟล์รวม ~160 MB อาจช้าครั้งแรกที่โหลด:
+โบรชัวร์ 65 ไฟล์รวม ~160 MB หนักไป **ขอแนะนำให้ย้ายไปเก็บที่ Cloud Storage** ดีกว่า:
 
-- **Vercel จะ cache อัตโนมัติ** หลังครั้งแรก (มี header `Cache-Control: immutable, max-age=1 year` ใน `vercel.json` แล้ว)
-- ถ้าอยากเล็กลง: ใช้ Ghostscript บีบ
-  ```powershell
-  # ติดตั้ง: https://www.ghostscript.com/releases/gsdnld.html
-  # บีบทุกไฟล์ใน public/brochures/
-  Get-ChildItem public\brochures\*.pdf | ForEach-Object {
-    gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook `
-      -dNOPAUSE -dQUIET -dBATCH `
-      -sOutputFile="public\brochures\compressed_$($_.Name)" $_.FullName
-  }
-  ```
-  มักลดได้ 50-70% (ภาพอ่านได้ปกติ)
+### ทำไมควรย้ายออก
 
-หรือย้าย PDF ไปเก็บที่ Cloudflare R2 / Google Cloud Storage แทน
-(แก้ `lib/brochures.ts` ให้ใช้ absolute URL)
+- **Vercel** จำกัด deploy ที่ 100 MB/file; ไฟล์รวมเยอะทำให้ build/deploy ช้า + กิน bandwidth quota
+- **OneDrive** sync ช้ามากที่ repo รวมไฟล์เป็น GB
+- **Git push** ใหญ่และนาน
+- Cloud storage มี CDN, รองรับ traffic ดีกว่า, **ฟรีสำหรับ traffic เริ่มต้น**
+
+### เปรียบเทียบ 3 ตัวเลือก (ฟรีระดับเริ่มต้น)
+
+| บริการ                 | Storage ฟรี | Bandwidth ฟรี       | ความง่าย | แนะนำเมื่อ                     |
+| ----------------------- | ----------- | ------------------- | -------- | ------------------------------ |
+| **Cloudflare R2**       | 10 GB       | ✅ ฟรีไม่จำกัด egress | ⭐⭐⭐    | **ตัวเลือกแรก** สำหรับ traffic ทุกระดับ |
+| **Backblaze B2 + Bunny CDN** | 10 GB     | 1 GB/วัน + CDN ราคาถูก | ⭐⭐      | ถ้าคุ้นกับ B2 อยู่แล้ว         |
+| **AWS S3 + CloudFront** | 5 GB        | 1 GB/เดือน (ปีแรก)  | ⭐       | ถ้าใช้ AWS อยู่แล้ว            |
+
+### ขั้นตอนย้ายไป Cloudflare R2 (แนะนำ)
+
+1. **สร้าง R2 bucket**
+   - เข้า <https://dash.cloudflare.com> → **R2** → Create bucket → ตั้งชื่อเช่น `phaiboon-aia-brochures`
+2. **เปิด Public Access**
+   - ที่ bucket → Settings → "Public R2.dev Bucket" → Enable
+   - Copy URL ที่ขึ้น (รูปแบบ `https://pub-XXXXXXXX.r2.dev`)
+3. **สร้าง API Token**
+   - R2 → Manage R2 API Tokens → Create API Token → permissions = Object Read & Write
+   - Copy `Access Key ID` + `Secret Access Key` + Account ID
+4. **ติดตั้ง AWS CLI** (จะใช้กับ R2 ผ่าน S3-compatible API)
+   - <https://aws.amazon.com/cli/>
+5. **อัปโหลด PDF + thumbnails** ในเครื่อง:
+   ```powershell
+   # ตั้ง env vars
+   $env:AWS_ACCESS_KEY_ID = "..."
+   $env:AWS_SECRET_ACCESS_KEY = "..."
+   $env:R2_ACCOUNT_ID = "..."
+   $env:R2_BUCKET = "phaiboon-aia-brochures"
+
+   # รันสคริปต์ที่เตรียมไว้
+   powershell -ExecutionPolicy Bypass -File .\upload-to-r2.ps1
+   ```
+6. **ใส่ env var ที่ Vercel**
+   ```
+   NEXT_PUBLIC_BROCHURE_CDN = https://pub-XXXXXXXX.r2.dev
+   ```
+   แล้ว Redeploy
+7. **ลบ public/brochures/ ออกจาก repo** เพื่อลดขนาด:
+   ```powershell
+   Remove-Item -Recurse -Force public\brochures
+   git add -A
+   git commit -m "Move brochures to Cloudflare R2"
+   git push
+   ```
+
+หลังจากนั้น `getBrochureUrl()` ใน `lib/brochures.ts` จะดึงไฟล์จาก R2 อัตโนมัติ ไม่ต้องแก้โค้ดเพิ่ม
+
+### ทางเลือก: ใช้ S3 ตรงๆ หรือ B2
+
+แก้ใน `upload-to-r2.ps1`:
+- เปลี่ยน `$endpoint` เป็น URL ของผู้ให้บริการ (S3 = ไม่ต้อง --endpoint-url, B2 มี endpoint เฉพาะ)
+- เปลี่ยน `NEXT_PUBLIC_BROCHURE_CDN` เป็น URL public ของผู้ให้บริการนั้น
+
+### ถ้าอยากเก็บใน Vercel เดิม
+
+ใช้ Ghostscript บีบ PDF ให้เล็กลง ~50-70%:
+
+```powershell
+# ติดตั้ง: https://www.ghostscript.com/releases/gsdnld.html
+Get-ChildItem public\brochures\*.pdf | ForEach-Object {
+  gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook `
+    -dNOPAUSE -dQUIET -dBATCH `
+    -sOutputFile="public\brochures\compressed_$($_.Name)" $_.FullName
+}
+```
 
 ---
 

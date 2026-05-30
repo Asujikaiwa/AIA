@@ -5,6 +5,7 @@ import StickyContact from "@/components/StickyContact";
 import CookieConsent from "@/components/CookieConsent";
 import JsonLd from "@/components/JsonLd";
 import Analytics from "@/components/Analytics";
+import I18nProvider from "@/components/I18nProvider";
 import {
   personSchema,
   financialServiceSchema,
@@ -94,10 +95,12 @@ export default function RootLayout({
         <JsonLd data={websiteSchema()} />
       </head>
       <body className="font-sans antialiased bg-white text-aia-slate">
-        {children}
-        <StickyContact />
-        <CookieConsent />
-        <Analytics />
+        <I18nProvider>
+          {children}
+          <StickyContact />
+          <CookieConsent />
+          <Analytics />
+        </I18nProvider>
       </body>
     </html>
   );

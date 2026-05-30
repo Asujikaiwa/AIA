@@ -2,53 +2,51 @@
 
 import { motion } from "framer-motion";
 import { Quote, Star } from "lucide-react";
+import { useT, usePick } from "./I18nProvider";
+import type { Localized } from "@/lib/i18n";
 
-// TODO: แทนที่ด้วยรีวิวลูกค้าจริง (ขอ permission ก่อนใช้ชื่อจริง/รูปจริง)
-const testimonials = [
+// รีวิวจาก 2 ท่านที่ยินยอมให้นำชื่อมาแสดง
+// TODO: แทนที่ quote ด้วยข้อความจริงจากแต่ละท่าน
+type Testimonial = {
+  name: string;
+  role: Localized;
+  quote: Localized;
+};
+
+const testimonials: Testimonial[] = [
   {
-    name: "คุณนภา ส.",
-    role: "พนักงานบริษัท, กรุงเทพฯ",
-    quote:
-      "คุณไพบูลย์อธิบายเข้าใจง่ายมาก ช่วยเลือกแผนสุขภาพที่ตรงกับงบประมาณ ตอนเคลมก็ดูแลทุกขั้นตอน รู้สึกอุ่นใจมาก"
+    name: "คุณไพฑูลย์",
+    role: {
+      th: "ลูกค้า",
+      en: "Customer",
+      zh: "客户"
+    },
+    quote: {
+      th: "พี่ไพบูลย์อธิบายแบบประกันได้เข้าใจง่ายมาก ดูแลตั้งแต่ก่อนซื้อจนถึงตอนเคลม ไม่มีบ่ายเบี่ยง ไว้ใจได้จริง ๆ",
+      en: "Khun Phaiboon explains insurance plans in a way that's easy to understand. He takes care of everything from pre-purchase to claims — no excuses, truly trustworthy.",
+      zh: "Phaiboon 解释保险方案非常清楚易懂,从投保到理赔全程关照,毫不推诿,真的可以信任。"
+    }
   },
   {
-    name: "คุณวิทยา จ.",
-    role: "เจ้าของธุรกิจ SME",
-    quote:
-      "ผมเคยลังเลเรื่องประกันมาก แต่หลังคุยกับพี่ไพบูลย์ ได้แผนที่ลดหย่อนภาษีและสะสมเงินไปด้วย เพอร์เฟกต์เลย"
-  },
-  {
-    name: "คุณพรทิพย์ ก.",
-    role: "ครู, ต่างจังหวัด",
-    quote:
-      "ติดต่อง่าย ตอบไลน์ไว ไม่กดดันให้ซื้อ ใส่ใจรายละเอียดมาก ๆ แนะนำเพื่อนต่อหลายคนแล้วค่ะ"
-  },
-  {
-    name: "คุณสมชาย ป.",
-    role: "พ่อค้าออนไลน์",
-    quote:
-      "เลือกแผนโรคร้ายให้พ่อแม่ คุณไพบูลย์เปรียบเทียบให้ทุกแบบ บอกชัดทั้งจุดเด่นและข้อจำกัด ไม่ขายฝัน ผมรู้สึกได้ของจริง"
-  },
-  {
-    name: "คุณอัญชลี ม.",
-    role: "พยาบาล, เชียงใหม่",
-    quote:
-      "ทำงานเป็นพยาบาลรู้ดีว่าค่ารักษาแพง อยากได้แผนสุขภาพดี ๆ พี่ไพบูลย์เลือก Health Happy + CI ให้ครบ ราคาเบี้ยลงตัวกับเงินเดือน"
-  },
-  {
-    name: "คุณธนกร ล.",
-    role: "Freelance, IT",
-    quote:
-      "ฟรีแลนซ์ไม่มีสวัสดิการ คุยกับพี่เขาแล้วเข้าใจชัดว่าควรเริ่มจากตัวไหน ผมได้แผนสุขภาพ + Annuity ลดหย่อนภาษีปีนี้ด้วย"
+    name: "คุณอนงค์รัตน์",
+    role: {
+      th: "ลูกค้า",
+      en: "Customer",
+      zh: "客户"
+    },
+    quote: {
+      th: "เลือกแผนสุขภาพให้ตรงกับงบ ไม่กดดันให้ซื้อใหญ่ ตอบไลน์ไวมาก ปรึกษาเรื่องประกันได้ทุกเรื่อง ประทับใจค่ะ",
+      en: "He picked a health plan that fits my budget — no pressure to upsize, replies on LINE very quickly, and is available for any insurance question. Truly impressed.",
+      zh: "为我挑选了符合预算的健康方案,不会催着加大保单,LINE 回讯息很快,任何保险问题都能咨询,印象非常好。"
+    }
   }
 ];
 
 export default function Testimonials() {
+  const t = useT();
+  const pick = usePick();
   return (
-    <section
-      id="testimonials"
-      className="py-20 sm:py-28 bg-white"
-    >
+    <section id="testimonials" className="py-20 sm:py-28 bg-white">
       <div className="section-container">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -57,25 +55,20 @@ export default function Testimonials() {
           transition={{ duration: 0.6 }}
           className="max-w-3xl mx-auto text-center mb-14"
         >
-          <span className="section-eyebrow">เสียงจากลูกค้า</span>
-          <h2 className="section-title">
-            ลูกค้าจริง รีวิวจริง
-          </h2>
-          <p className="mt-5 text-lg text-aia-gray">
-            ความไว้ใจจากลูกค้า
-            คือเครื่องยืนยันคุณภาพการบริการของผม
-          </p>
+          <span className="section-eyebrow">{t("test.eyebrow")}</span>
+          <h2 className="section-title">{t("test.title")}</h2>
+          <p className="mt-5 text-lg text-aia-gray">{t("test.subtitle")}</p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {testimonials.map((t, i) => (
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          {testimonials.map((review, i) => (
             <motion.figure
-              key={t.name}
+              key={review.name}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="bg-aia-bg rounded-2xl p-7 border border-gray-100 relative"
+              className="bg-aia-bg rounded-2xl p-7 sm:p-8 border border-gray-100 relative"
             >
               <Quote
                 className="absolute top-5 right-5 text-aia-red/20"
@@ -86,14 +79,12 @@ export default function Testimonials() {
                   <Star key={idx} size={16} fill="currentColor" />
                 ))}
               </div>
-              <blockquote className="text-aia-slate leading-relaxed mb-5">
-                “{t.quote}”
+              <blockquote className="text-aia-slate leading-relaxed mb-5 text-base sm:text-lg">
+                &ldquo;{pick(review.quote)}&rdquo;
               </blockquote>
               <figcaption>
-                <div className="font-semibold text-aia-slate">
-                  {t.name}
-                </div>
-                <div className="text-sm text-aia-gray">{t.role}</div>
+                <div className="font-semibold text-aia-slate">{review.name}</div>
+                <div className="text-sm text-aia-gray">{pick(review.role)}</div>
               </figcaption>
             </motion.figure>
           ))}

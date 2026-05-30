@@ -4,8 +4,11 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronDown, HelpCircle } from "lucide-react";
 import { faqs } from "@/lib/faqs";
+import { useT, usePick } from "./I18nProvider";
 
 export default function FAQ() {
+  const t = useT();
+  const pick = usePick();
   const [open, setOpen] = useState<number | null>(0);
 
   return (
@@ -18,14 +21,9 @@ export default function FAQ() {
           transition={{ duration: 0.6 }}
           className="max-w-3xl mx-auto text-center mb-12"
         >
-          <span className="section-eyebrow">FAQ</span>
-          <h2 className="section-title">
-            คำถามที่ลูกค้าถามบ่อยที่สุด
-          </h2>
-          <p className="mt-5 text-lg text-aia-gray">
-            รวมคำถามยอดฮิตเกี่ยวกับประกัน AIA ถ้าไม่เจอคำตอบที่ต้องการ
-            ทักผมมาถามได้เสมอครับ
-          </p>
+          <span className="section-eyebrow">{t("faq.eyebrow")}</span>
+          <h2 className="section-title">{t("faq.title")}</h2>
+          <p className="mt-5 text-lg text-aia-gray">{t("faq.subtitle")}</p>
         </motion.div>
 
         <div className="max-w-3xl mx-auto space-y-3">
@@ -33,7 +31,7 @@ export default function FAQ() {
             const isOpen = open === i;
             return (
               <motion.div
-                key={item.q}
+                key={item.q.th}
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -60,7 +58,7 @@ export default function FAQ() {
                     <HelpCircle size={18} />
                   </span>
                   <span className="flex-1 font-semibold text-aia-slate text-base sm:text-lg leading-snug pt-1">
-                    {item.q}
+                    {pick(item.q)}
                   </span>
                   <ChevronDown
                     size={20}
@@ -78,7 +76,7 @@ export default function FAQ() {
                 >
                   <div className="overflow-hidden">
                     <p className="text-aia-gray leading-relaxed px-5 sm:px-6 pb-5 sm:pb-6 pl-[3.75rem] sm:pl-[4.5rem]">
-                      {item.a}
+                      {pick(item.a)}
                     </p>
                   </div>
                 </div>
@@ -94,14 +92,12 @@ export default function FAQ() {
           transition={{ duration: 0.5 }}
           className="max-w-3xl mx-auto mt-10 text-center"
         >
-          <p className="text-aia-gray mb-4">
-            มีคำถามอื่นที่ไม่เจอในนี้?
-          </p>
+          <p className="text-aia-gray mb-4">{t("faq.more")}</p>
           <a
             href="#contact"
             className="inline-flex items-center gap-2 rounded-full border-2 border-aia-red bg-white px-7 py-3 text-base font-semibold text-aia-red transition-all duration-300 hover:bg-aia-red hover:text-white"
           >
-            ถามผมโดยตรง
+            {t("faq.askDirect")}
           </a>
         </motion.div>
       </div>

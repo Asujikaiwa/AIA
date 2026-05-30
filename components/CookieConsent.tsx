@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Cookie, X } from "lucide-react";
+import { useT } from "./I18nProvider";
 
 const STORAGE_KEY = "phaiboon-aia-cookie-consent-v1";
 const CONSENT_EVENT = "phaiboon-aia-consent-changed";
@@ -10,6 +11,7 @@ const CONSENT_EVENT = "phaiboon-aia-consent-changed";
 type ConsentState = "accepted" | "rejected" | null;
 
 export default function CookieConsent() {
+  const t = useT();
   const [state, setState] = useState<ConsentState>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -28,7 +30,6 @@ export default function CookieConsent() {
   const save = (value: "accepted" | "rejected") => {
     try {
       localStorage.setItem(STORAGE_KEY, value);
-      // แจ้ง component อื่น (เช่น Analytics) ให้รู้ทันที
       window.dispatchEvent(new Event(CONSENT_EVENT));
     } catch {
       // ignore
@@ -48,16 +49,15 @@ export default function CookieConsent() {
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-aia-slate flex items-center gap-2">
               <Cookie size={18} className="sm:hidden text-aia-red" />
-              เว็บนี้ใช้คุกกี้
+              {t("cookie.title")}
             </h3>
             <p className="text-sm text-aia-gray mt-1 leading-relaxed">
-              เราใช้คุกกี้เพื่อปรับปรุงประสบการณ์การใช้งานเว็บไซต์
-              และวิเคราะห์การใช้งานอย่างไม่ระบุตัวตน คุณสามารถอ่านรายละเอียดที่{" "}
+              {t("cookie.body")}{" "}
               <Link
                 href="/privacy"
                 className="text-aia-red font-semibold underline-offset-2 hover:underline"
               >
-                นโยบายความเป็นส่วนตัว
+                {t("cookie.policyLink")}
               </Link>
             </p>
             <div className="mt-3 flex flex-col sm:flex-row gap-2">
@@ -66,21 +66,21 @@ export default function CookieConsent() {
                 onClick={() => save("accepted")}
                 className="inline-flex items-center justify-center rounded-full bg-aia-red text-white text-sm font-semibold px-5 py-2 hover:bg-aia-redDark transition-colors"
               >
-                ยอมรับทั้งหมด
+                {t("cookie.accept")}
               </button>
               <button
                 type="button"
                 onClick={() => save("rejected")}
                 className="inline-flex items-center justify-center rounded-full border border-gray-200 text-aia-slate text-sm font-semibold px-5 py-2 hover:border-aia-red hover:text-aia-red transition-colors"
               >
-                ปฏิเสธคุกกี้ที่ไม่จำเป็น
+                {t("cookie.reject")}
               </button>
             </div>
           </div>
           <button
             type="button"
             onClick={() => save("rejected")}
-            aria-label="ปิด"
+            aria-label="Close"
             className="flex-shrink-0 text-aia-gray hover:text-aia-slate transition-colors"
           >
             <X size={18} />

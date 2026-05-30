@@ -11,6 +11,7 @@ export type ProductCardProps = {
   bullets: string[];
   highlightColor?: string;
   index?: number;
+  ctaLabel?: string;
 };
 
 export default function ProductCard({
@@ -19,7 +20,8 @@ export default function ProductCard({
   subtitle,
   description,
   bullets,
-  index = 0
+  index = 0,
+  ctaLabel = "ขอใบเสนอแผน"
 }: ProductCardProps) {
   return (
     <motion.article
@@ -57,7 +59,7 @@ export default function ProductCard({
         href="#contact"
         className="inline-flex items-center gap-1 text-aia-red font-semibold text-sm hover:gap-2 transition-all"
       >
-        ขอใบเสนอแผน
+        {ctaLabel}
         <ArrowRight size={16} />
       </a>
     </motion.article>

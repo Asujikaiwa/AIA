@@ -1,6 +1,10 @@
+"use client";
+
 import { Facebook, Instagram, MessageCircle } from "lucide-react";
+import { useT } from "./I18nProvider";
 
 export default function Footer() {
+  const t = useT();
   const year = new Date().getFullYear();
 
   return (
@@ -14,22 +18,12 @@ export default function Footer() {
                 AIA
               </div>
               <div>
-                <p className="font-semibold text-white">
-                  Phaiboon Pilachai
-                </p>
-                <p className="text-xs text-gray-400">
-                  Insurance Agent | AIA Thailand
-                </p>
+                <p className="font-semibold text-white">Phaiboon Pilachai</p>
+                <p className="text-xs text-gray-400">{t("nav.role")}</p>
               </div>
             </div>
             <p className="text-sm text-gray-400 leading-relaxed max-w-md">
-              ที่ปรึกษาด้านประกันชีวิตและสุขภาพ
-              พร้อมดูแลคุณและครอบครัวอย่างจริงใจ — เพราะ
-              <em className="text-aia-red not-italic">
-                {" "}
-                ประกันที่ดี
-              </em>{" "}
-              ไม่ใช่แค่กรมธรรม์ แต่คือคนที่อยู่ข้างคุณตลอดทาง
+              {t("footer.tagline")}
             </p>
 
             <div className="flex items-center gap-3 mt-5">
@@ -56,41 +50,41 @@ export default function Footer() {
 
           {/* Quick links */}
           <div>
-            <h4 className="font-semibold text-white mb-4">เมนู</h4>
+            <h4 className="font-semibold text-white mb-4">{t("footer.menu")}</h4>
             <ul className="space-y-2 text-sm">
               <li>
                 <a href="/#about" className="hover:text-aia-red transition-colors">
-                  เกี่ยวกับฉัน
+                  {t("nav.about")}
                 </a>
               </li>
               <li>
                 <a href="/#products" className="hover:text-aia-red transition-colors">
-                  ผลิตภัณฑ์ประกัน
+                  {t("nav.products")}
                 </a>
               </li>
               <li>
                 <a href="/brochures" className="hover:text-aia-red transition-colors">
-                  โบรชัวร์
+                  {t("nav.brochures")}
                 </a>
               </li>
               <li>
                 <a href="/recommend" className="hover:text-aia-red transition-colors">
-                  เลือกแบบให้ฉัน
+                  {t("nav.recommend")}
                 </a>
               </li>
               <li>
                 <a href="/#faq" className="hover:text-aia-red transition-colors">
-                  คำถามที่พบบ่อย
+                  {t("nav.faq")}
                 </a>
               </li>
               <li>
                 <a href="/#contact" className="hover:text-aia-red transition-colors">
-                  ติดต่อปรึกษา
+                  {t("nav.contact")}
                 </a>
               </li>
               <li>
                 <a href="/privacy" className="hover:text-aia-red transition-colors">
-                  นโยบายความเป็นส่วนตัว
+                  {t("footer.privacy")}
                 </a>
               </li>
             </ul>
@@ -98,17 +92,21 @@ export default function Footer() {
 
           {/* License info */}
           <div>
-            <h4 className="font-semibold text-white mb-4">ข้อมูลตัวแทน</h4>
+            <h4 className="font-semibold text-white mb-4">{t("footer.agentInfo")}</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                ใบอนุญาตตัวแทน คปภ.
+                {t("footer.license")}
                 <br />
-                <span className="text-gray-400">เลขที่ 6901006784</span>
+                <span className="text-gray-400">
+                  {t("footer.licenseNoPrefix")} 6901006784
+                </span>
               </li>
               <li>
-                สังกัด
+                {t("footer.affiliation")}
                 <br />
-                <span className="text-gray-400">บริษัท เอไอเอ จำกัด</span>
+                <span className="text-gray-400">
+                  {t("about.license.companyName")}
+                </span>
               </li>
               <li className="pt-2">
                 <a
@@ -131,10 +129,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
-          <p>
-            © {year} Phaiboon Pilachai. สงวนลิขสิทธิ์ — เว็บไซต์ส่วนตัวของตัวแทน
-            ไม่ใช่เว็บไซต์ทางการของ AIA
-          </p>
+          <p>© {year} Phaiboon Pilachai. {t("footer.disclaimer")}</p>
           <p>
             <a
               href="https://www.aia.co.th/th"
@@ -142,7 +137,7 @@ export default function Footer() {
               rel="noopener noreferrer"
               className="hover:text-aia-red transition-colors"
             >
-              ข้อมูลผลิตภัณฑ์อย่างเป็นทางการ → AIA.co.th
+              {t("footer.officialLink")}
             </a>
           </p>
         </div>

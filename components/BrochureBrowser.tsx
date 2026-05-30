@@ -7,9 +7,12 @@ import {
   brochures,
   groups,
   subCategories,
+  getBrochureUrl,
+  getThumbUrl,
   type Brochure,
   type GroupId
 } from "@/lib/brochures";
+import { useT, usePick } from "./I18nProvider";
 
 type Filter = "all" | GroupId;
 
@@ -18,6 +21,8 @@ function normalize(s: string) {
 }
 
 export default function BrochureBrowser() {
+  const t = useT();
+  const pick = usePick();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
 
@@ -26,9 +31,9 @@ export default function BrochureBrowser() {
     return brochures.filter((b) => {
       if (filter !== "all" && b.group !== filter) return false;
       if (!q) return true;
-      const haystack = normalize(
-        `${b.title} ${b.code} ${b.description} ${b.badge}`
-      );
+      // ค้นหาในทุกภาษาเพื่อให้ user ค้นด้วยคำที่ถนัด
+      const desc = `${b.description.th} ${b.description.en ?? ""} ${b.description.zh ?? ""}`;
+      const haystack = normalize(`${b.title} ${b.code} ${desc} ${b.badge}`);
       return haystack.includes(q);
     });
   }, [query, filter]);
@@ -49,14 +54,14 @@ export default function BrochureBrowser() {
       const sections = subs
         .map((s) => ({
           subId: s.id,
-          subLabel: s.label,
+          subLabel: pick(s.label),
           items: filtered.filter((b) => b.subcategory === s.id)
         }))
         .filter((s) => s.items.length > 0);
       if (sections.length > 0) result.push({ groupId: gid, sections });
     }
     return result;
-  }, [filtered, filter]);
+  }, [filtered, filter, pick]);
 
   const totalCount = filtered.length;
 
@@ -75,14 +80,14 @@ export default function BrochureBrowser() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="ค้นหาแบบประกัน เช่น Health Happy, สะสมทรัพย์, PA..."
+              placeholder={t("broc.searchPh")}
               className="w-full pl-11 pr-10 py-3 rounded-full border border-gray-200 bg-white text-sm text-aia-slate placeholder:text-aia-gray/70 focus:outline-none focus:border-aia-red focus:ring-2 focus:ring-aia-red/20 transition-all"
             />
             {query && (
               <button
                 type="button"
                 onClick={() => setQuery("")}
-                aria-label="ล้างคำค้นหา"
+                aria-label={t("broc.searchClear")}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-aia-gray hover:text-aia-red hover:bg-aia-redLight transition-colors"
               >
                 <X size={16} />
@@ -95,7 +100,7 @@ export default function BrochureBrowser() {
             <FilterPill
               active={filter === "all"}
               onClick={() => setFilter("all")}
-              label="ทั้งหมด"
+              label={t("broc.all")}
               count={brochures.length}
             />
             {groups.map((g) => (
@@ -103,7 +108,7 @@ export default function BrochureBrowser() {
                 key={g.id}
                 active={filter === g.id}
                 onClick={() => setFilter(g.id)}
-                label={g.label}
+                label={pick(g.label)}
                 count={brochures.filter((b) => b.group === g.id).length}
               />
             ))}
@@ -111,12 +116,14 @@ export default function BrochureBrowser() {
         </div>
 
         <p className="mt-3 text-xs text-aia-gray">
-          พบ <span className="font-semibold text-aia-red">{totalCount}</span>{" "}
-          แบบประกัน
+          {t("broc.foundPrefix")}{" "}
+          <span className="font-semibold text-aia-red">{totalCount}</span>{" "}
+          {t("broc.foundSuffix")}
           {query && (
             <>
               {" "}
-              ที่ตรงกับ <span className="font-semibold">&quot;{query}&quot;</span>
+              {t("broc.foundFor")}{" "}
+              <span className="font-semibold">&quot;{query}&quot;</span>
             </>
           )}
         </p>
@@ -128,12 +135,8 @@ export default function BrochureBrowser() {
           <div className="inline-flex w-16 h-16 rounded-full bg-aia-redLight items-center justify-center text-aia-red mb-4">
             <Search size={28} />
           </div>
-          <h3 className="text-lg font-bold text-aia-slate">
-            ไม่พบแบบประกันที่ค้นหา
-          </h3>
-          <p className="mt-2 text-aia-gray">
-            ลองเปลี่ยนคำค้นหาหรือเลือกหมวดใหม่ดูครับ
-          </p>
+          <h3 className="text-lg font-bold text-aia-slate">{t("broc.empty")}</h3>
+          <p className="mt-2 text-aia-gray">{t("broc.emptyHint")}</p>
         </div>
       )}
 
@@ -147,9 +150,9 @@ export default function BrochureBrowser() {
                 {group.eyebrow}
               </p>
               <h2 className="text-2xl sm:text-3xl font-bold text-aia-slate">
-                {group.label}
+                {pick(group.label)}
               </h2>
-              <p className="mt-2 text-aia-gray max-w-3xl">{group.description}</p>
+              <p className="mt-2 text-aia-gray max-w-3xl">{pick(group.description)}</p>
             </div>
 
             {sections.map((sec) => (
@@ -159,7 +162,7 @@ export default function BrochureBrowser() {
                     {sec.subLabel}
                   </h3>
                   <span className="text-xs text-aia-gray">
-                    {sec.items.length} แบบ
+                    {sec.items.length} {t("broc.countSuffix")}
                   </span>
                   <span className="flex-1 h-px bg-gradient-to-r from-aia-redLight to-transparent" />
                 </div>
@@ -225,9 +228,10 @@ function BrochureCard({
   index?: number;
   highlight?: string;
 }) {
-  const href = `/brochures/${item.file}`;
+  const pick = usePick();
+  const href = getBrochureUrl(item.file);
   const slug = item.file.replace(/\.pdf$/i, "");
-  const thumbSrc = `/brochures/thumbs/${slug}.jpg`;
+  const thumbSrc = getThumbUrl(slug);
   const [thumbOk, setThumbOk] = useState(true);
 
   return (
@@ -291,30 +295,39 @@ function BrochureCard({
           <Highlight text={item.title} query={highlight} />
         </h3>
         <p className="text-sm text-aia-gray leading-relaxed mb-5 flex-1">
-          {item.description}
+          {pick(item.description)}
         </p>
 
         <div className="flex items-center gap-2">
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1.5 flex-1 rounded-full bg-aia-red px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-aia-redDark"
-          >
-            <Eye size={16} />
-            เปิดอ่าน
-          </a>
-          <a
-            href={href}
-            download
-            aria-label={`ดาวน์โหลดโบรชัวร์ ${item.title}`}
-            className="inline-flex items-center justify-center rounded-full border-2 border-aia-red px-3 py-2 text-aia-red transition-colors hover:bg-aia-red hover:text-white"
-          >
-            <Download size={16} />
-          </a>
+          <ViewDownload href={href} title={item.title} />
         </div>
       </div>
     </motion.article>
+  );
+}
+
+function ViewDownload({ href, title }: { href: string; title: string }) {
+  const t = useT();
+  return (
+    <>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center justify-center gap-1.5 flex-1 rounded-full bg-aia-red px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-aia-redDark"
+      >
+        <Eye size={16} />
+        {t("broc.openView")}
+      </a>
+      <a
+        href={href}
+        download
+        aria-label={`${t("broc.download")} ${title}`}
+        className="inline-flex items-center justify-center rounded-full border-2 border-aia-red px-3 py-2 text-aia-red transition-colors hover:bg-aia-red hover:text-white"
+      >
+        <Download size={16} />
+      </a>
+    </>
   );
 }
 

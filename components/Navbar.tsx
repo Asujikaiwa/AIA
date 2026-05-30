@@ -2,17 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import LanguageSwitcher from "./LanguageSwitcher";
+import { useT } from "./I18nProvider";
+import type { DictKey } from "@/lib/i18n";
 
-const navLinks = [
-  { href: "/#about", label: "เกี่ยวกับฉัน" },
-  { href: "/#products", label: "ผลิตภัณฑ์" },
-  { href: "/brochures", label: "โบรชัวร์" },
-  { href: "/recommend", label: "เลือกแบบให้ฉัน" },
-  { href: "/#faq", label: "คำถามที่พบบ่อย" },
-  { href: "/#contact", label: "ติดต่อ" }
+type NavLink = { href: string; labelKey: DictKey };
+
+const navLinks: NavLink[] = [
+  { href: "/#about", labelKey: "nav.about" },
+  { href: "/#products", labelKey: "nav.products" },
+  { href: "/brochures", labelKey: "nav.brochures" },
+  { href: "/recommend", labelKey: "nav.recommend" },
+  { href: "/#faq", labelKey: "nav.faq" },
+  { href: "/#contact", labelKey: "nav.contact" }
 ];
 
 export default function Navbar() {
+  const t = useT();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -41,38 +47,44 @@ export default function Navbar() {
               Phaiboon Pilachai
             </div>
             <div className="text-xs text-aia-gray leading-tight">
-              ตัวแทนประกัน AIA
+              {t("nav.role")}
             </div>
           </div>
         </a>
 
-        <ul className="hidden lg:flex items-center gap-8">
+        <ul className="hidden lg:flex items-center gap-7">
           {navLinks.map((link) => (
             <li key={link.href}>
               <a
                 href={link.href}
                 className="text-sm font-medium text-aia-slate hover:text-aia-red transition-colors"
               >
-                {link.label}
+                {t(link.labelKey)}
               </a>
             </li>
           ))}
         </ul>
 
-        <a
-          href="/#contact"
-          className="hidden lg:inline-flex btn-primary !py-2 !px-5 !text-sm"
-        >
-          ปรึกษาฟรี
-        </a>
+        <div className="hidden lg:flex items-center gap-3">
+          <LanguageSwitcher />
+          <a
+            href="/#contact"
+            className="inline-flex btn-primary !py-2 !px-5 !text-sm"
+          >
+            {t("nav.cta")}
+          </a>
+        </div>
 
-        <button
-          aria-label="Toggle menu"
-          onClick={() => setOpen(!open)}
-          className="lg:hidden p-2 text-aia-slate"
-        >
-          {open ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="lg:hidden flex items-center gap-2">
+          <LanguageSwitcher compact />
+          <button
+            aria-label="Toggle menu"
+            onClick={() => setOpen(!open)}
+            className="p-2 text-aia-slate"
+          >
+            {open ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </nav>
 
       {open && (
@@ -85,7 +97,7 @@ export default function Navbar() {
                   onClick={() => setOpen(false)}
                   className="block py-2 text-aia-slate font-medium hover:text-aia-red"
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </a>
               </li>
             ))}
@@ -95,7 +107,7 @@ export default function Navbar() {
                 onClick={() => setOpen(false)}
                 className="btn-primary w-full"
               >
-                ปรึกษาฟรี
+                {t("nav.cta")}
               </a>
             </li>
           </ul>

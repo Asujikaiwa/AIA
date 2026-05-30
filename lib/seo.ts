@@ -107,16 +107,25 @@ export function breadcrumbSchema(
   };
 }
 
-export function faqSchema(faqs: Array<{ q: string; a: string }>) {
+/**
+ * FAQPage schema สำหรับ SEO
+ * ใช้ภาษาไทยเป็นหลัก (ตาม inLanguage ของเว็บ) เพื่อให้ Google ไทยแสดง rich result
+ * รับได้ทั้ง { q: string; a: string } และ Localized
+ */
+export function faqSchema(
+  faqs: Array<{ q: string | { th: string }; a: string | { th: string } }>
+) {
+  const text = (v: string | { th: string }): string =>
+    typeof v === "string" ? v : v.th;
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: faqs.map((f) => ({
       "@type": "Question",
-      name: f.q,
+      name: text(f.q),
       acceptedAnswer: {
         "@type": "Answer",
-        text: f.a
+        text: text(f.a)
       }
     }))
   };

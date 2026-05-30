@@ -11,7 +11,14 @@ import {
   MessageCircle,
   Sparkles
 } from "lucide-react";
-import { brochures, type Brochure, type SubCategoryId } from "@/lib/brochures";
+import {
+  brochures,
+  getBrochureUrl,
+  getThumbUrl,
+  type Brochure,
+  type SubCategoryId
+} from "@/lib/brochures";
+import { useT, usePick } from "./I18nProvider";
 
 type Goal = "health" | "saving" | "ci" | "retire" | "family" | "tax";
 type Budget = "low" | "mid" | "high" | "premium";
@@ -132,6 +139,8 @@ function recommendList(ans: Answers, limit = 6): Brochure[] {
 const LINE_URL = "https://lin.ee/your-line-oa";
 
 export default function Recommender() {
+  const t = useT();
+  const pick = usePick();
   const [step, setStep] = useState<Step>("age");
   const [answers, setAnswers] = useState<Answers>({ goals: [] });
 
@@ -194,7 +203,7 @@ export default function Recommender() {
       <div className="mb-8">
         <div className="flex justify-between text-xs text-aia-gray mb-2">
           <span>
-            ขั้นตอนที่ {stepIdx + 1} จาก {STEPS.length}
+            {t("rec.stepOf")} {stepIdx + 1} {t("rec.of")} {STEPS.length}
           </span>
           <span>{Math.round(progress)}%</span>
         </div>
@@ -218,7 +227,7 @@ export default function Recommender() {
           transition={{ duration: 0.3 }}
         >
           {step === "age" && (
-            <Card title="คุณอายุเท่าไหร่?" subtitle="เบี้ยและประเภทแบบประกันที่เหมาะขึ้นกับช่วงอายุ">
+            <Card title={t("rec.q.age.title")} subtitle={t("rec.q.age.sub")}>
               <input
                 type="number"
                 min={1}
@@ -230,14 +239,14 @@ export default function Recommender() {
                     age: e.target.value ? Number(e.target.value) : undefined
                   }))
                 }
-                placeholder="เช่น 32"
+                placeholder={t("rec.q.age.ph")}
                 className="w-full text-2xl font-semibold text-center py-5 px-6 rounded-2xl border-2 border-gray-200 focus:border-aia-red focus:outline-none focus:ring-4 focus:ring-aia-red/20 transition-all"
               />
             </Card>
           )}
 
           {step === "stage" && (
-            <Card title="ตอนนี้คุณอยู่ในช่วงไหนของชีวิต?" subtitle="เลือก 1 ข้อที่ใกล้เคียงที่สุด">
+            <Card title={t("rec.q.stage.title")} subtitle={t("rec.q.stage.sub")}>
               <div className="grid sm:grid-cols-2 gap-3">
                 {stageOptions.map((o) => (
                   <OptionButton
@@ -253,7 +262,7 @@ export default function Recommender() {
           )}
 
           {step === "goals" && (
-            <Card title="คุณอยากได้แบบประกันเพื่ออะไร?" subtitle="เลือกได้หลายข้อ">
+            <Card title={t("rec.q.goals.title")} subtitle={t("rec.q.goals.sub")}>
               <div className="grid sm:grid-cols-2 gap-3">
                 {goalOptions.map((o) => {
                   const selected = answers.goals.includes(o.id);
@@ -279,7 +288,7 @@ export default function Recommender() {
           )}
 
           {step === "budget" && (
-            <Card title="งบเบี้ยที่จ่ายไหวต่อเดือน?" subtitle="ประมาณการเบื้องต้น เพื่อแนะนำแบบที่เหมาะ">
+            <Card title={t("rec.q.budget.title")} subtitle={t("rec.q.budget.sub")}>
               <div className="space-y-3">
                 {budgetOptions.map((o) => (
                   <OptionButton
@@ -299,22 +308,21 @@ export default function Recommender() {
               <div className="text-center mb-8">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-aia-redLight rounded-full text-aia-red text-sm font-semibold mb-4">
                   <Sparkles size={16} />
-                  ผลการแนะนำ
+                  {t("rec.result.badge")}
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-aia-slate">
                   {recommendations.length > 0
-                    ? `${recommendations.length} แบบที่น่าจะเหมาะกับคุณ`
-                    : "ยังจับคู่ไม่เจอ ขอข้อมูลเพิ่ม"}
+                    ? `${recommendations.length} ${t("rec.result.title")}`
+                    : t("rec.result.none")}
                 </h2>
-                <p className="mt-3 text-aia-gray">
-                  ระบบเรียงตามความเหมาะสมจากคำตอบของคุณ คลิกดูโบรชัวร์
-                  หรือทักผมเพื่อขอใบเสนอจริง
-                </p>
+                <p className="mt-3 text-aia-gray">{t("rec.result.sub")}</p>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4 mb-8">
                 {recommendations.map((b, i) => {
                   const slug = b.file.replace(/\.pdf$/i, "");
+                  const thumb = getThumbUrl(slug);
+                  const href = getBrochureUrl(b.file);
                   return (
                     <motion.div
                       key={b.file}
@@ -325,29 +333,29 @@ export default function Recommender() {
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={`/brochures/thumbs/${slug}.jpg`}
+                        src={thumb}
                         alt={b.title}
                         className="w-16 h-22 object-cover rounded-md flex-shrink-0 bg-aia-redLight"
                         style={{ aspectRatio: "3/4" }}
                       />
                       <div className="flex-1 min-w-0">
                         <p className="text-[10px] font-semibold uppercase tracking-wider text-aia-red">
-                          อันดับ {i + 1}
+                          {t("rec.result.rank")} {i + 1}
                         </p>
                         <h3 className="font-bold text-aia-slate text-sm leading-snug mb-1">
                           {b.title}
                         </h3>
                         <p className="text-xs text-aia-gray line-clamp-2 mb-2">
-                          {b.description}
+                          {pick(b.description)}
                         </p>
                         <a
-                          href={`/brochures/${b.file}`}
+                          href={href}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-xs font-semibold text-aia-red hover:text-aia-redDark"
                         >
                           <FileText size={12} />
-                          เปิดโบรชัวร์
+                          {t("rec.result.openBrochure")}
                         </a>
                       </div>
                     </motion.div>
@@ -357,12 +365,8 @@ export default function Recommender() {
 
               {/* CTA */}
               <div className="rounded-3xl bg-gradient-to-br from-aia-red to-aia-redDark p-6 sm:p-8 text-white text-center">
-                <h3 className="text-xl sm:text-2xl font-bold">
-                  อยากได้ใบเสนอจริง?
-                </h3>
-                <p className="mt-2 text-white/90">
-                  ทักผมพร้อมส่งข้อมูลที่กรอกแล้ว ผมจะจัดใบเสนอที่เหมาะกับคุณภายใน 1-2 วัน
-                </p>
+                <h3 className="text-xl sm:text-2xl font-bold">{t("rec.cta.title")}</h3>
+                <p className="mt-2 text-white/90">{t("rec.cta.body")}</p>
                 <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
                   <a
                     href={`${LINE_URL}?text=${encodeURIComponent(lineMessage)}`}
@@ -371,13 +375,13 @@ export default function Recommender() {
                     className="inline-flex items-center justify-center gap-2 rounded-full bg-white text-aia-red font-semibold px-7 py-3 hover:bg-aia-redLight transition-colors"
                   >
                     <MessageCircle size={18} />
-                    ส่งข้อมูลทาง LINE
+                    {t("rec.cta.line")}
                   </a>
                   <Link
                     href="/#contact"
                     className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-white/40 text-white font-semibold px-7 py-3 hover:bg-white/10 transition-colors"
                   >
-                    ฝากเบอร์แทน
+                    {t("rec.cta.callback")}
                   </Link>
                 </div>
               </div>
@@ -388,7 +392,7 @@ export default function Recommender() {
                   onClick={restart}
                   className="text-sm text-aia-gray hover:text-aia-red transition-colors"
                 >
-                  เริ่มใหม่อีกครั้ง
+                  {t("rec.restart")}
                 </button>
               </div>
             </div>
@@ -406,7 +410,7 @@ export default function Recommender() {
             className="inline-flex items-center gap-1.5 text-aia-gray hover:text-aia-slate disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             <ArrowLeft size={16} />
-            ย้อนกลับ
+            {t("rec.back")}
           </button>
           <button
             type="button"
@@ -414,7 +418,7 @@ export default function Recommender() {
             disabled={!canGoNext}
             className="inline-flex items-center gap-2 rounded-full bg-aia-red text-white font-semibold px-7 py-3 hover:bg-aia-redDark disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:-translate-y-0.5 hover:shadow-card"
           >
-            {step === "budget" ? "ดูผลแนะนำ" : "ถัดไป"}
+            {step === "budget" ? t("rec.viewResult") : t("rec.next")}
             <ArrowRight size={16} />
           </button>
         </div>

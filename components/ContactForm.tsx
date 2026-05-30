@@ -11,18 +11,39 @@ import {
   AlertCircle,
   type LucideIcon
 } from "lucide-react";
+import { useT } from "./I18nProvider";
+import { useI18n } from "./I18nProvider";
 
 type FormStatus = "idle" | "sending" | "success" | "error";
 
-const interests = [
-  "ประกันสุขภาพเหมาจ่าย",
-  "ประกันชีวิตเพื่อครอบครัว",
-  "โรคร้ายแรง",
-  "ออมทรัพย์และลดหย่อนภาษี",
-  "ยังไม่แน่ใจ ขอคำปรึกษา"
-];
+const interestsByLocale = {
+  th: [
+    "ประกันสุขภาพเหมาจ่าย",
+    "ประกันชีวิตเพื่อครอบครัว",
+    "โรคร้ายแรง",
+    "ออมทรัพย์และลดหย่อนภาษี",
+    "ยังไม่แน่ใจ ขอคำปรึกษา"
+  ],
+  en: [
+    "Comprehensive Health Coverage",
+    "Life Insurance for Family",
+    "Critical Illness",
+    "Savings & Tax Planning",
+    "Not sure yet, need advice"
+  ],
+  zh: [
+    "综合医疗保障",
+    "守护家庭的人寿保险",
+    "重大疾病",
+    "储蓄与税务规划",
+    "尚未决定,需要咨询"
+  ]
+} as const;
 
 export default function ContactForm() {
+  const t = useT();
+  const { locale } = useI18n();
+  const interests = interestsByLocale[locale];
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errorMsg, setErrorMsg] = useState<string>("");
 
@@ -70,14 +91,9 @@ export default function ContactForm() {
           transition={{ duration: 0.6 }}
           className="max-w-3xl mx-auto text-center mb-12"
         >
-          <span className="section-eyebrow">ติดต่อปรึกษา</span>
-          <h2 className="section-title">
-            พร้อมรับคำปรึกษาฟรี — ไม่มีค่าใช้จ่าย
-          </h2>
-          <p className="mt-5 text-lg text-aia-gray">
-            กรอกข้อมูลด้านล่าง หรือทักไลน์มาคุยกันได้เลย
-            ผมตอบกลับภายใน 1 วันทำการ
-          </p>
+          <span className="section-eyebrow">{t("contact.eyebrow")}</span>
+          <h2 className="section-title">{t("contact.title")}</h2>
+          <p className="mt-5 text-lg text-aia-gray">{t("contact.subtitle")}</p>
         </motion.div>
 
         <div className="grid lg:grid-cols-5 gap-8 max-w-6xl mx-auto">
@@ -92,32 +108,32 @@ export default function ContactForm() {
           >
             <div className="grid sm:grid-cols-2 gap-5">
               <Field
-                label="ชื่อ - นามสกุล"
+                label={t("contact.name")}
                 name="name"
-                placeholder="ชื่อของคุณ"
+                placeholder={t("contact.namePh")}
                 required
               />
               <Field
-                label="เบอร์โทรศัพท์"
+                label={t("contact.phone")}
                 name="phone"
                 type="tel"
-                placeholder="0XX-XXX-XXXX"
+                placeholder={t("contact.phonePh")}
                 required
               />
             </div>
 
             <div className="mt-5">
               <Field
-                label="อีเมล (ไม่บังคับ)"
+                label={t("contact.email")}
                 name="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder={t("contact.emailPh")}
               />
             </div>
 
             <div className="mt-5">
               <label className="block text-sm font-medium text-aia-slate mb-2">
-                สนใจแผนประกัน
+                {t("products.eyebrow")}
               </label>
               <select
                 name="interest"
@@ -126,7 +142,7 @@ export default function ContactForm() {
                 className="w-full rounded-xl border border-gray-200 px-4 py-3 text-aia-slate focus:border-aia-red focus:ring-2 focus:ring-aia-red/20 outline-none transition"
               >
                 <option value="" disabled>
-                  -- เลือกแผนที่สนใจ --
+                  --
                 </option>
                 {interests.map((i) => (
                   <option key={i} value={i}>
@@ -138,12 +154,12 @@ export default function ContactForm() {
 
             <div className="mt-5">
               <label className="block text-sm font-medium text-aia-slate mb-2">
-                ข้อความเพิ่มเติม (ไม่บังคับ)
+                {t("contact.message")}
               </label>
               <textarea
                 name="message"
                 rows={4}
-                placeholder="เล่ารายละเอียดเพื่อให้ผมเตรียมข้อมูลก่อนได้เลย"
+                placeholder={t("contact.messagePh")}
                 className="w-full rounded-xl border border-gray-200 px-4 py-3 text-aia-slate focus:border-aia-red focus:ring-2 focus:ring-aia-red/20 outline-none transition resize-none"
               />
             </div>
@@ -154,25 +170,24 @@ export default function ContactForm() {
               className="btn-primary w-full mt-6 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <Send size={18} />
-              {status === "sending" ? "กำลังส่ง..." : "ส่งข้อมูลให้ตัวแทนติดต่อกลับ"}
+              {status === "sending" ? t("contact.sending") : t("contact.send")}
             </button>
 
             {status === "success" && (
               <p className="mt-4 flex items-center gap-2 text-sm text-green-600 bg-green-50 rounded-lg px-4 py-3">
                 <CheckCircle2 size={16} />
-                ขอบคุณครับ ผมจะรีบติดต่อกลับโดยเร็วที่สุด
+                {t("contact.success")}
               </p>
             )}
             {status === "error" && (
               <p className="mt-4 flex items-center gap-2 text-sm text-red-600 bg-red-50 rounded-lg px-4 py-3">
                 <AlertCircle size={16} />
-                {errorMsg || "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง"}
+                {errorMsg || t("contact.error")}
               </p>
             )}
 
             <p className="mt-4 text-xs text-aia-gray text-center">
-              ข้อมูลของคุณจะถูกเก็บเป็นความลับ
-              ใช้เฉพาะการติดต่อปรึกษาเท่านั้น
+              {t("contact.consent")}
             </p>
           </motion.form>
 
@@ -186,36 +201,36 @@ export default function ContactForm() {
           >
             <div className="bg-aia-red rounded-3xl p-7 text-white">
               <MessageCircle size={32} className="mb-4" />
-              <h3 className="text-xl font-bold mb-2">ทักไลน์ </h3>
+              <h3 className="text-xl font-bold mb-2">{t("contact.lineTitle")}</h3>
               <p className="text-sm text-white/90 mb-5">
-                สะดวกที่สุด ตอบกลับภายในไม่กี่นาที
-                สแกน QR หรือกดปุ่มด้านล่าง
+                {t("contact.altTitle")}
               </p>
               <div className="bg-white rounded-xl p-4 mb-4 flex items-center justify-center">
-                {/* Replace src with your real LINE QR */}
-                <div className="w-32 h-32 bg-aia-redLight/50 rounded-lg flex items-center justify-center text-aia-red text-xs text-center px-2">
-                  วาง LINE QR <br /> ที่นี่
-                </div>
+                <img 
+                  src="/LINE_Contact.jpg" 
+                   alt="LINE QR Code" 
+                    className="w-32 h-32 object-contain rounded-lg"
+                   />
               </div>
               <a
-                href="https://lin.ee/your-line-oa"
+                href="https://line.me/ti/p/YJM6KPxuKR"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full text-center bg-white text-aia-red font-semibold rounded-full py-3 hover:bg-aia-redLight transition-colors"
               >
-                เพิ่มเพื่อนทางไลน์
+                {t("contact.lineAdd")}
               </a>
             </div>
 
             <ContactChannel
               icon={Phone}
-              title="โทรหาผมโดยตรง"
+              title={t("contact.phoneTitle")}
               value="096-249-2611"
               href="tel:+66962492611"
             />
             <ContactChannel
               icon={Mail}
-              title="อีเมล"
+              title={t("contact.emailTitle")}
               value="phaiboonaia@gmail.com"
               href="mailto:phaiboonaia@gmail.com"
             />
