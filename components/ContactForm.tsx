@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Send,
@@ -47,34 +47,50 @@ export default function ContactForm() {
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errorMsg, setErrorMsg] = useState<string>("");
 
+  // เวลาที่เริ่มเห็นฟอร์ม — server-side จะเช็คว่ากรอกเร็วเกินไปไหม
+  const formStartedAt = useRef<number>(0);
+  useEffect(() => {
+    formStartedAt.current = Date.now();
+  }, []);
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus("sending");
     setErrorMsg("");
 
     const formData = new FormData(e.currentTarget);
-    const payload = Object.fromEntries(formData.entries());
+    const payload: Record<string, unknown> = Object.fromEntries(
+      formData.entries()
+    );
+    // ผนวก timestamp ที่เริ่มเห็นฟอร์ม
+    payload.form_started_at = formStartedAt.current;
 
     try {
-      // Replace with your webhook / API route
-      const endpoint =
-        process.env.NEXT_PUBLIC_LEAD_WEBHOOK ?? "/api/lead";
+      const endpoint = process.env.NEXT_PUBLIC_LEAD_WEBHOOK ?? "/api/lead";
 
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        // ไม่ต้องส่ง credentials/cookies ไปกับ form
+        credentials: "omit",
+        // กันการ cache
+        cache: "no-store"
       });
 
-      if (!res.ok) throw new Error("ส่งข้อมูลไม่สำเร็จ");
+      if (res.status === 429) {
+        throw new Error(t("contact.error"));
+      }
+      if (!res.ok) throw new Error(t("contact.error"));
 
       setStatus("success");
       (e.target as HTMLFormElement).reset();
+      // reset timestamp สำหรับครั้งถัดไป
+      formStartedAt.current = Date.now();
     } catch (err) {
       setStatus("error");
-      setErrorMsg(
-        err instanceof Error ? err.message : "เกิดข้อผิดพลาด กรุณาลองใหม่"
-      );
+      // ไม่ leak รายละเอียด error ของระบบให้ user
+      setErrorMsg(err instanceof Error ? err.message : t("contact.error"));
     }
   }
 
@@ -106,6 +122,28 @@ export default function ContactForm() {
             onSubmit={handleSubmit}
             className="lg:col-span-3 bg-white rounded-3xl p-7 sm:p-9 shadow-card border border-gray-100"
           >
+            {/* Honeypot: bot จะกรอกอัตโนมัติ — user ไม่เห็น */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                left: "-9999px",
+                width: 1,
+                height: 1,
+                overflow: "hidden"
+              }}
+            >
+              <label htmlFor="website">Website (leave blank)</label>
+              <input
+                type="text"
+                id="website"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                defaultValue=""
+              />
+            </div>
+
             <div className="grid sm:grid-cols-2 gap-5">
               <Field
                 label={t("contact.name")}

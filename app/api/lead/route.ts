@@ -1,73 +1,188 @@
 import { NextResponse } from "next/server";
 
+// ============================================================================
+// Lead Form API — security-hardened
+// ============================================================================
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+const MAX_BODY_BYTES = 4 * 1024;
+const RATE_WINDOW_MS = 10 * 60 * 1000;
+const RATE_MAX = 5;
+const rateMap = new Map<string, number[]>();
+
+function rateLimitOk(ip: string): boolean {
+  const now = Date.now();
+  const hits = (rateMap.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
+  hits.push(now);
+  rateMap.set(ip, hits);
+  if (rateMap.size > 5000) {
+    for (const [k, v] of rateMap) {
+      if (v.every((t) => now - t > RATE_WINDOW_MS)) rateMap.delete(k);
+    }
+  }
+  return hits.length <= RATE_MAX;
+}
+
+function getIP(req: Request): string {
+  const h = req.headers;
+  return (
+    h.get("cf-connecting-ip") ||
+    h.get("x-real-ip") ||
+    (h.get("x-forwarded-for") || "").split(",")[0].trim() ||
+    "unknown"
+  );
+}
+
+function clean(s: unknown, maxLen: number): string {
+  if (typeof s !== "string") return "";
+  return s.replace(/[\x00-\x1f\x7f]/g, " ").trim().slice(0, maxLen);
+}
+
+const PHONE_RE = /^[0-9+()\-\s]{8,20}$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
 type LeadPayload = {
   name?: string;
   phone?: string;
   email?: string;
   interest?: string;
   message?: string;
+  website?: string;
+  form_started_at?: number;
 };
 
-async function forwardLead(payload: LeadPayload) {
-  // นำรหัสของคุณมาใส่ในเครื่องหมายคำพูดด้านล่างนี้
-  // (สำหรับการใช้งานจริงบน Production แนะนำให้ย้าย 2 ตัวแปรนี้ไปเก็บไว้ในไฟล์ .env.local นะครับ)
-  const LINE_ACCESS_TOKEN = "6ad+hE+rLr4M87MdXG/GYhPYW8J5YcADcnfQJ+E8ch5WqnpORtczVpxhyhmzdxwhur5B74JK3vSGFEVg+VVN8nse/ZWqKLnLpaDqzKxpnjFFQYMSEUrTcYNhOd7N73aFQq3+om+oLLSQ00PHwXaaOAdB04t89/1O/w1cDnyilFU=";
-  const YOUR_USER_ID = "U2f698231a14d6ebf30ad38d847233d05"; // ใส่ User ID ที่ต้องการให้ส่งข้อความเข้าไป
+const MIN_FORM_FILL_MS = 3000;
 
-  // จัดรูปแบบข้อความที่จะส่งเข้า LINE
-  const textMessage = `🚨 มีลูกค้าสนใจประกันติดต่อมาใหม่!\n\nชื่อ: ${payload.name}\nเบอร์โทร: ${payload.phone}\nอีเมล: ${payload.email || "-"}\nสนใจ: ${payload.interest || "-"}\nข้อความ: ${payload.message || "-"}`;
-
-  // ยิง API ไปที่ LINE Messaging API
-  const response = await fetch("https://api.line.me/v2/bot/message/push", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${LINE_ACCESS_TOKEN}`,
-    },
-    body: JSON.stringify({
-      to: YOUR_USER_ID,
-      messages: [{ type: "text", text: textMessage }],
-    }),
-  });
-
-  // เช็คว่าส่งสำเร็จหรือไม่ ถ้าไม่สำเร็จให้ log error ออกมา
-  if (!response.ok) {
-    const errorDetail = await response.text();
-    console.error("[LINE API Error]:", errorDetail);
-    throw new Error("Failed to send LINE message");
+async function forwardLead(
+  payload: Required<Pick<LeadPayload, "name" | "phone">> & LeadPayload
+) {
+  const token = process.env.LINE_ACCESS_TOKEN;
+  const userId = process.env.LINE_USER_ID;
+  if (!token || !userId) {
+    console.warn("[lead] LINE_ACCESS_TOKEN/LINE_USER_ID not set");
+    return;
   }
-  
-  console.log("[lead] ส่งแจ้งเตือนเข้า LINE สำเร็จ");
+
+  const text = [
+    "🚨 มีลูกค้าสนใจประกันติดต่อมาใหม่",
+    "",
+    `ชื่อ: ${payload.name}`,
+    `เบอร์โทร: ${payload.phone}`,
+    `อีเมล: ${payload.email || "-"}`,
+    `สนใจ: ${payload.interest || "-"}`,
+    "",
+    "ข้อความ:",
+    payload.message || "(ไม่มีข้อความเพิ่มเติม)"
+  ].join("\n");
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+  try {
+    const res = await fetch("https://api.line.me/v2/bot/message/push", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        to: userId,
+        messages: [{ type: "text", text }]
+      }),
+      signal: controller.signal
+    });
+    if (!res.ok) {
+      console.error(`[lead] LINE API ${res.status}`);
+    }
+  } catch (e) {
+    console.error("[lead] LINE fetch failed:", e instanceof Error ? e.message : e);
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
+const methodNotAllowed = () =>
+  NextResponse.json({ ok: false }, { status: 405, headers: { Allow: "POST" } });
+
+export const GET = methodNotAllowed;
+export const PUT = methodNotAllowed;
+export const DELETE = methodNotAllowed;
+export const PATCH = methodNotAllowed;
+
 export async function POST(req: Request) {
-  try {
-    const data = (await req.json()) as LeadPayload;
+  const ct = req.headers.get("content-type") || "";
+  if (!ct.includes("application/json")) {
+    return NextResponse.json({ ok: false }, { status: 415 });
+  }
 
-    if (!data.name || !data.phone) {
-      return NextResponse.json(
-        { ok: false, error: "ชื่อและเบอร์โทรเป็นข้อมูลที่จำเป็น" },
-        { status: 400 }
-      );
-    }
+  const len = Number(req.headers.get("content-length") || "0");
+  if (len > MAX_BODY_BYTES) {
+    return NextResponse.json({ ok: false }, { status: 413 });
+  }
 
-    // Light validation: phone must contain digits
-    if (!/\d/.test(data.phone)) {
-      return NextResponse.json(
-        { ok: false, error: "รูปแบบเบอร์โทรไม่ถูกต้อง" },
-        { status: 400 }
-      );
-    }
-
-    // เรียกใช้ฟังก์ชันส่ง LINE
-    await forwardLead(data);
-
-    return NextResponse.json({ ok: true });
-  } catch (err) {
-    console.error("[lead] error:", err);
+  const ip = getIP(req);
+  if (!rateLimitOk(ip)) {
     return NextResponse.json(
-      { ok: false, error: "เกิดข้อผิดพลาดภายในระบบ" },
-      { status: 500 }
+      { ok: false, error: "ส่งคำขอบ่อยเกินไป ลองใหม่อีกครั้งภายหลัง" },
+      { status: 429, headers: { "Retry-After": "600" } }
     );
   }
+
+  let raw: unknown;
+  try {
+    raw = await req.json();
+  } catch {
+    return NextResponse.json({ ok: false }, { status: 400 });
+  }
+
+  if (!raw || typeof raw !== "object") {
+    return NextResponse.json({ ok: false }, { status: 400 });
+  }
+  const data = raw as LeadPayload;
+
+  if (typeof data.website === "string" && data.website.trim().length > 0) {
+    return NextResponse.json({ ok: true });
+  }
+
+  if (typeof data.form_started_at === "number") {
+    const elapsed = Date.now() - data.form_started_at;
+    if (elapsed >= 0 && elapsed < MIN_FORM_FILL_MS) {
+      return NextResponse.json({ ok: true });
+    }
+  }
+
+  const name = clean(data.name, 100);
+  const phone = clean(data.phone, 25);
+  const email = clean(data.email, 120);
+  const interest = clean(data.interest, 60);
+  const message = clean(data.message, 1000);
+
+  if (!name || !phone) {
+    return NextResponse.json(
+      { ok: false, error: "กรุณากรอกชื่อและเบอร์โทรศัพท์" },
+      { status: 400 }
+    );
+  }
+
+  if (!PHONE_RE.test(phone)) {
+    return NextResponse.json(
+      { ok: false, error: "รูปแบบเบอร์โทรไม่ถูกต้อง" },
+      { status: 400 }
+    );
+  }
+  if (email && !EMAIL_RE.test(email)) {
+    return NextResponse.json(
+      { ok: false, error: "รูปแบบอีเมลไม่ถูกต้อง" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    await forwardLead({ name, phone, email, interest, message });
+  } catch (e) {
+    console.error("[lead] forward error:", e instanceof Error ? e.message : e);
+  }
+
+  return NextResponse.json({ ok: true });
 }

@@ -1,0 +1,11 @@
+# security.txt ตาม RFC 9116 — ช่องทางแจ้งช่องโหว่อย่างมีความรับผิดชอบ
+Contact: mailto:phaiboonaia@gmail.com
+Preferred-Languages: th, en
+Canonical: https://phaiboon-aia.com/.well-known/security.txt
+Expires: 2027-12-31T23:59:59.000Z
+
+# ห้ามทำ:
+# - automated scanning / vulnerability scanning โดยไม่ได้รับอนุญาต
+# - DDoS / load testing
+# - social engineering พนักงานหรือลูกค้า
+# - การเข้าถึงข้อมูลของบุคคลที่สามโดยไม่ได้รับอนุญาต
